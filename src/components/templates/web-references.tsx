@@ -30,12 +30,12 @@ export function WebReferences({
     <>
       <Credenza>
         <div className="max-w-3xl mx-auto p-2 rounded-lg">
-          <h2 className="text-black text-lg font-semibold mb-3">Sources:</h2>
+          <h2 className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 text-lg font-semibold mb-3">Sources:</h2>
           <div className="flex flex-row space-x-2 overflow-x-auto">
               {/* @ts-ignore */}
             {searchResults?.web.results.slice(0, 3).map((item, index) => (
                 <div key={index} className="flex-shrink-0 w-60 p-2 rounded-xl bg-opacity-30 border border-neutral-400">
-                  <h3 className="text-black text-sm font-medium mb-1 line-clamp-2">{item.title}</h3>
+                  <h3 className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 text-sm font-medium mb-1 line-clamp-2">{item.title}</h3>
                   <div className="flex items-center text-gray-400 text-xs">
                     <img
                       src={item.meta_url.favicon}
@@ -156,7 +156,7 @@ export function WebReferences({
             {searchResults?.web.results.map((item: any) => (
               <div
                 key={item.url}
-                className="p-4 bg-[#f4eaea] rounded-sm cursor-pointer my-2 mx-2"
+                className="p-4 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 border-2 rounded-lg cursor-pointer my-2 mx-2"
                 onClick={() => {
                   window.open(item.url, '_blank');
                 }}

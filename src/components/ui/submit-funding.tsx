@@ -68,14 +68,14 @@ export function SubmitFunding() {
             <DialogTrigger asChild>
                 <Button variant="outline" className='className="hidden ml-2 md:flex"'>
                     <IconPlus />
-                    <span className="ml-2">Submit scholarship</span>
+                    <span className="ml-2">Coming soon</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px]">
                 <DialogHeader>
-                    <DialogTitle>Submit scholarship</DialogTitle>
+                    <DialogTitle>Coming soon</DialogTitle>
                     <DialogDescription>
-                        Help submit funding resources for prospective students.
+                      Features in the pipeline.
                     </DialogDescription>
                 </DialogHeader>
                 <ScholarshipForm />
@@ -89,14 +89,14 @@ export function SubmitFunding() {
             <DrawerTrigger asChild>
                 <Button variant="outline" className='className="hidden ml-2 md:flex"'>
                     <IconPlus />
-                    <span className="ml-2">Submit scholarship</span>
+                    <span className="ml-2">Coming soon</span>
                 </Button>
             </DrawerTrigger>
             <DrawerContent className='overflow-y-scroll'>
                 <DrawerHeader className="text-left">
-                    <DrawerTitle>Submit scholarship</DrawerTitle>
+                    <DrawerTitle>Coming soon</DrawerTitle>
                     <DrawerDescription>
-                        Help submit funding resources for prospective students.
+                        Features in the pipeline.
                     </DrawerDescription>
                 </DrawerHeader>
                 <ScholarshipForm />
@@ -114,9 +114,15 @@ export function ScholarshipForm() {
   return (
   <Alert>
       <Terminal className="h-4 w-4" />
-      <AlertTitle>Coming Soon!</AlertTitle>
       <AlertDescription>
-        Submit scholarship or other funding sources to help match prospective students with the right opportunities.
+        <ul>
+          <li>- Submit funding sources to help match prospective students with the right opportunities.</li>
+          <li>- Third-party authentication.</li>
+          <li>- Match students with scholarships through memory of chats.</li>
+          <li>- Pin and track funding you're interested in.</li>
+          <li>- Set reminders of incoming scholarship deadlines.</li>
+          <li>- Create a personalize draft personal statements and export.</li>
+        </ul>
       </AlertDescription>
     </Alert>
   )

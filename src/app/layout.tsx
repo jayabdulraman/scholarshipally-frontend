@@ -13,10 +13,10 @@ export const metadata = {
     ? new URL(`https://${process.env.VERCEL_URL}`)
     : undefined,
   title: {
-    default: 'ScholarshipAlly Chatbot',
+    default: 'Ally Chatbot',
     template: `%s - Chatbot`
   },
-  description: 'An AI-powered scholarship retrieval & matching chatbot',
+  description: 'Your ally in matching you with scholarships',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',

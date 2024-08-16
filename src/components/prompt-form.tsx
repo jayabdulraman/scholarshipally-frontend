@@ -83,7 +83,7 @@ export function PromptForm({
         // implement input character limit && dailyRateLimit === 'false'
         // get cookie
         const dailyRateLimit = getCookie('knownRequests')
-        if (value.length <= 150 && dailyLimit < 5) {
+        if (value.length <= 150 && dailyLimit < 4) {
           // Optimistically add user message UI
           setMessages(currentMessages => [
             ...currentMessages,
@@ -116,8 +116,8 @@ export function PromptForm({
           if (value.length >= 150) {
             toast.error("Input should be less than 150 characters!")
           }
-          else if (dailyLimit > 4) {
-            toast.error("Daily rate limit exceeded! Try again after 24 hours!")
+          else if (dailyLimit > 3) {
+            toast.error(`Daily rate limit exceeded! You are out of free messages until: ${formatDate(tryAt)}`)
           }
           else {
             return
@@ -125,7 +125,7 @@ export function PromptForm({
         }
       }}
     >
-        {dailyLimit > 4 ? (
+        {dailyLimit > 3 ? (
           <Alert variant="destructive" className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Free Plan Limit </AlertTitle>
@@ -170,7 +170,7 @@ export function PromptForm({
               <div className="absolute right-0 top-[13px] sm:right-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button type="submit" size="icon" disabled={input === '' || input.length > 150 || dailyLimit > 5}>
+                    <Button type="submit" size="icon" disabled={input === '' || input.length > 150 || dailyLimit > 3}>
                       <IconArrowElbow />
                       <span className="sr-only">Send message</span>
                     </Button>

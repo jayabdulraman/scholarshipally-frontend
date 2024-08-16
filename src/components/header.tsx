@@ -63,7 +63,7 @@ export function Header() {
       <div className="flex items-center justify-end space-x-2">
         <SubmitFunding />
         <a
-          href="https://vercel.com/templates/Next.js/nextjs-ai-chatbot"
+          href="https://buymeacoffee.com/jayabdulraman"
           target="_blank"
           className={cn(buttonVariants())}
         >

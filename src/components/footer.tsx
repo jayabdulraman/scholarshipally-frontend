@@ -12,7 +12,7 @@ export function FooterText({ className, ...props }: React.ComponentProps<'p'>) {
       )}
       {...props}
     >
-      Scholar can make mistakes. Verify important info. <span> </span>
+      Ally can make mistakes. Verify important info. <span> </span>
       <ExternalLink href="https://www.linkedin.com/in/jayabdulraman">
         Built by AJ
       </ExternalLink>
