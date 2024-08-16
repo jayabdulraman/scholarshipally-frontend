@@ -119,7 +119,7 @@ export function ScholarshipForm() {
           <li>- Submit funding sources to help match prospective students with the right opportunities.</li>
           <li>- Third-party authentication.</li>
           <li>- Match students with scholarships through memory of chats.</li>
-          <li>- Pin and track funding you're interested in.</li>
+          <li>- Pin and track funding you are interested in.</li>
           <li>- Set reminders of incoming scholarship deadlines.</li>
           <li>- Create a personalize draft personal statements and export.</li>
         </ul>
