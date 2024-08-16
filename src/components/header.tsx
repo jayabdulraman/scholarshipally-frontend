@@ -8,9 +8,11 @@ import {
   IconNextChat,
   IconPlus,
   IconSeparator,
-  IconVercel
+  IconVercel,
+  IconGraduationCap,
 } from '@/components/ui/icons'
 import { FiCoffee } from "react-icons/fi";
+import { FaGraduationCap } from "react-icons/fa6";
 import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
@@ -19,8 +21,7 @@ import { Session } from '@/lib/types'
 import { SubmitFunding } from '@/components/ui/submit-funding'
 
 async function UserOrLogin() {
-  {/*@ts-ignore*/}
-  const session = (await auth()) as Session
+  const session = (await auth()) as unknown as Session
   return (
     <>
       {session?.user ? (
@@ -32,8 +33,9 @@ async function UserOrLogin() {
         </>
       ) : (
         <Link href="/" rel="nofollow">
-          <IconNextChat className="size-6 mr-2 dark:hidden" inverted />
-          <IconNextChat className="hidden size-6 mr-2 dark:block" />
+          <IconGraduationCap className="w-9 h-9" inverted/>
+          {/* <IconNextChat className="size-6 mr-2 dark:hidden" inverted />
+          <IconNextChat className="hidden size-6 mr-2 dark:block" /> */}
         </Link>
       )}
       <div className="flex items-center">
