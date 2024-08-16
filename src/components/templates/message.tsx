@@ -98,7 +98,7 @@ export function InternetMessage({
   return (
     <div className={cn('group relative flex items-start md:-ml-12', className)}>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-10">
-        <h2 className="text-black text-lg font-semibold mb-3">Answer:</h2>
+        <h2 className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 text-lg font-semibold mb-3">Answer:</h2>
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}

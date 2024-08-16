@@ -49,17 +49,16 @@ export async function getChat(id: string, userId: string) {
       Authorization: `Token ${token}`,
     };
 
-    const res = await axios.get<Chat>(`${server}/api/thread/${id}/`, { headers, maxContentLength: Infinity,
-      maxBodyLength: Infinity });
+    const res = await fetch(`${server}/api/thread/${id}/`, { headers });
 
-    const chat = res.data
+    const chat = res.json()
 
     //console.log("GET CHAT:",chat)
     // const chat = await kv.hgetall<Chat>(`chat:${id}`)
     // console.log("Get Threads:", chat)
     //const UserId = parseInt(userId)
-    if (!chat || (userId && String(chat.userId) !== userId)) {
-      console.log('NOT RETURNING CHAT!', userId, chat.userId)
+    if (!chat) {
+      console.log('NOT RETURNING CHAT!')
       return null
     }
 
