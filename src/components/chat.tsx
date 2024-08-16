@@ -65,13 +65,9 @@ export function ChatComponent({ id, className, session, missingKeys }: ChatProps
       className="group w-full overflow-auto pl-0 peer-[[data-state=open]]:lg:pl-[250px] peer-[[data-state=open]]:xl:pl-[300px]"
       ref={scrollRef}
     >
-     {session?.user ? (
-        <div className='fixed z-40'>
-          <SearchTypeDropdown />
-        </div>
-      ) : (
-        null
-      )}
+      <div className='fixed z-40'>
+        <SearchTypeDropdown />
+      </div>
       <div
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
@@ -82,7 +78,6 @@ export function ChatComponent({ id, className, session, missingKeys }: ChatProps
           <EmptyScreen session={session || undefined} />
         )}
         <div className="w-full h-px" ref={visibilityRef} />
-        {session?.user ? (
           <ChatPanel
             id={id}
             input={input}
@@ -90,9 +85,6 @@ export function ChatComponent({ id, className, session, missingKeys }: ChatProps
             isAtBottom={isAtBottom}
             scrollToBottom={scrollToBottom} 
           />
-        ) : (
-          null
-        )}
       </div>
     </div>
   )

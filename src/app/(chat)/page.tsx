@@ -6,13 +6,13 @@ import { Session } from '@/lib/types'
 import { getMissingKeys } from '@/app/actions'
 
 export const metadata = {
-  title: 'Next.js AI Chatbot'
+  title: 'ScholarshipAlly'
 }
 
 export default async function IndexPage() {
   const id = uuidv4();
-  {/* @ts-ignore */}
-  const session = (await auth()) as Session
+  
+  const session = (await auth()) as unknown as Session
   const missingKeys = await getMissingKeys()
 
   return (

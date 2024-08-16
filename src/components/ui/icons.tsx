@@ -88,6 +88,43 @@ function IconNextChat({
   )
 }
 
+const IconGraduationCap = ({
+  className,
+  inverted,
+  ...props
+}: React.ComponentProps<'svg'> & { inverted?: boolean }) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      width="24"
+      height="24"
+      {...props}
+    >
+      {/* Cap top */}
+      <path
+        d="M2 9L12 3L22 9L12 15L2 9Z"
+        fill={inverted ? '#555555' : '#808080'}
+      />
+      {/* Cap bottom */}
+      <path
+        d="M4 10.5V17H20V10.5L12 14.5L4 10.5Z"
+        fill={inverted ? '#333333' : '#606060'}
+      />
+      {/* Tassel */}
+      <path
+        d="M7 11.5V18"
+        stroke={inverted ? '#FFD700' : '#FFA500'}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
+
 function IconOpenAI({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
@@ -103,6 +140,28 @@ function IconOpenAI({ className, ...props }: React.ComponentProps<'svg'>) {
     </svg>
   )
 }
+
+function IconLightBulb({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      role="img"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn('size-4', className)}
+      {...props}
+    >
+      <title>Light Bulb icon</title>
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm-1 14h2v-2h-2v2zm0-4h2V7h-2v5z" />
+      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z" />
+      <path d="M7.5 2.5L4 6" />
+      <path d="M16.5 2.5L20 6" />
+      <path d="M3 10h3" />
+      <path d="M18 10h3" />
+    </svg>
+  )
+}
+
 
 function IconVercel({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
@@ -479,7 +538,9 @@ function IconChevronUpDown({
 export {
   IconEdit,
   IconNextChat,
+  IconGraduationCap,
   IconOpenAI,
+  IconLightBulb,
   IconVercel,
   IconGitHub,
   IconSeparator,
