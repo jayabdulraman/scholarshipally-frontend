@@ -37,7 +37,15 @@ import { cookies } from "next/headers";
 import { generateText } from 'ai';
 // import { extract } from '@extractus/article-extractor';
 
-const client = new QdrantClient({ host: "localhost", port: 6333 });
+const devMode = process.env.DEVELOPMENT_MODE
+
+const client = (devMode === 'true') ? (new QdrantClient({ host: "localhost", port: 6333 })) : (
+  new QdrantClient(
+    { url: "https://354019c4-4335-4286-b11e-5a59db5a8be2.europe-west3-0.gcp.cloud.qdrant.io:6333",
+    apiKey: process.env.QDRANT_API_KEY
+    }
+))
+  
 
 // Helper function to safely access nested properties
 function safeGet<T, K extends keyof T>(obj: T | null | undefined, key: K): T[K] | undefined {
