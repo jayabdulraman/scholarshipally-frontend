@@ -10,14 +10,6 @@ const nextConfig = {
           }
         ]
       },
-    // webpack: (config, { isServer }) => {
-    //   if (!isServer) {
-    //     config.resolve.alias.https = "https-browserify";
-    //     config.resolve.alias.http = "http-browserify";
-    //     return config;
-    //   }
-    //   return config;
-    // },
 };
 
 module.exports = nextConfig

@@ -36,14 +36,14 @@ export function ChatPanel({
 
   const exampleMessages = [
     {
-      heading: 'What are the top',
-      subheading: 'undergraduate scholarships in the US?',
-      message: `What are the top undergraduate scholarships in the US?`
+      heading: 'I am interested in graduate scholarships',
+      subheading: 'for sub-saharan African students?',
+      message: `Recommend some graduate scholarships for sub-saharan African students`
     },
     {
-      heading: 'Recommend fully-funded graduate',
-      subheading: 'scholarships for international students',
-      message: 'Recommend fully-funded graduate scholarships for international students'
+      heading: 'Recommend scholarships for',
+      subheading: 'intenational students in Europe',
+      message: 'What are some scholarships for international students in Europe?'
     },
     {
       heading: 'I would like top strategies',
@@ -51,9 +51,9 @@ export function ChatPanel({
       message: `I would like top strategies to write winning personal statements`
     },
     {
-      heading: 'I am graduate in business',
-      subheading: `recommend scholarships for me`,
-      message: `Recommend scholarships for business graduates`
+      heading: 'MBA Scholarships',
+      subheading: `MBA scholarships for international students`,
+      message: `Recommend MBA scholarships for international students`
     }
   ]
 
