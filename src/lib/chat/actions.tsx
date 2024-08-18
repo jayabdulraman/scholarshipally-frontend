@@ -7,6 +7,7 @@ import {
   streamUI,
   createStreamableValue
 } from 'ai/rsc'
+{/* @ts-ignore */}
 import { openai } from '@ai-sdk/openai'
 import {
   spinner,
@@ -16,16 +17,13 @@ import {
   InternetMessage,
 } from '@/components/templates'
 import { z } from 'zod'
-import { EventsSkeleton } from '@/components/templates/events-skeleton'
-import { Events } from '@/components/templates/events'
+import { ScholarshipsSkeleton } from '@/components/templates/scholarships-skeleton'
+import { Scholarships } from '@/components/templates/scholarships'
 import {
-  formatNumber,
-  runAsyncFnWithoutBlocking,
-  sleep,
-  nanoid
+  sleep
 } from '@/lib/utils'
 import { SpinnerMessage, UserMessage } from '@/components/templates/message'
-import { Chat, Message, BingResults, ContentWithSource } from '@/lib/types'
+import { Chat, Message, ContentWithSource } from '@/lib/types'
 import { auth } from '@/auth'
 import {QdrantClient} from '@qdrant/js-client-rest';
 import { embed } from 'ai';
@@ -35,7 +33,8 @@ import { WebReferences } from '@/components/templates/web-references';
 import { SkeletonCard } from '@/components/templates/web-references-skeleton';
 import { cookies } from "next/headers";
 import { generateText } from 'ai';
-// import { extract } from '@extractus/article-extractor';
+import { parse } from 'node-html-parser';
+import axios from 'axios'
 
 const devMode = process.env.DEVELOPMENT_MODE
 
@@ -60,7 +59,6 @@ async function submitUserMessage(content: string) {
 
   const cookieStore = cookies(); 
   const searchType = cookieStore.get('newSearchType')?.value;
-  console.log("Search Type:", searchType)
 
   aiState.update({
     ...aiState.get(),
@@ -89,19 +87,40 @@ async function submitUserMessage(content: string) {
   };
   
   // INTERNET SEARCH (GOOGLE SEARCH)
-  if (searchType && searchType === "GoogleSearch") {
+  if (searchType === "GoogleSearch") {
     const chatMemory = aiState.get().messages.map((message) => `{'role': ${message.role}, 'content': ${message.content}}\n`)
-    console.log("AI State:", aiState.get().messages)
     // refined query
     const refinedQuery = await queryRefiner(content,  chatMemory)
-    console.log("REFINED QUERY:", refinedQuery)
     // get search
     const searchData = await getSearchResultsFromMemory(refinedQuery);
     //console.log("Search Data:", searchData?.web.results)
     // function to fetch page contents to feed as context
     async function fetchPageContent(url: string): Promise<string> {
-      const article = ""//await extract(url);
-      return article //article?.content || '';
+      try {
+        const response = await axios.get(url);
+        const html = response.data;
+        const root = parse(html);
+    
+        // Remove script and style elements
+        root.querySelectorAll('script, style').forEach(el => el.remove());
+    
+        // Try to find the main content
+        const mainContent = 
+          root.querySelector('main') || 
+          root.querySelector('article') || 
+          root.querySelector('.content') || 
+          root.querySelector('#content');
+    
+        if (mainContent) {
+          return mainContent.textContent.trim();
+        }
+    
+        // If no main content found, return the body text
+        return  root.querySelector('body')?.textContent.trim() || '';
+      } catch (error) {
+        console.error(`Error fetching content from ${url}:`, error);
+        return '';
+      }
     }
     // get content
     const contentWithSources: ContentWithSource[] = [];
@@ -109,6 +128,7 @@ async function submitUserMessage(content: string) {
     for (const result of searchData?.web.results.slice(0, 2)) {
       try {
         const content = await fetchPageContent(result.url)
+        console.log("CONTENT:", content)
         contentWithSources.push({
           content,
           source: result
@@ -117,7 +137,7 @@ async function submitUserMessage(content: string) {
         console.error(`Error fetching content from ${result.url}:`, error);
       }
     }
-    console.log("CONTENT:", contentWithSources);
+
     let textStream: undefined | ReturnType<typeof createStreamableValue<string>>
     let textNode: undefined | React.ReactNode
     // declare UI
@@ -125,7 +145,7 @@ async function submitUserMessage(content: string) {
       model: openai('gpt-4o-mini'),
       initial: <SpinnerMessage />,
       system: `\
-      You are a search assistant that answers the user query based on search results and generates UI to display sources.
+      You are a scholarship search assistant that answers the user query based on search results and generates UI to display sources.
       Search Result: ${contentWithSources.map((result: {content: string}) => 
         `${result.content}\nn`).join(' ')}
       Instructions:
@@ -143,7 +163,6 @@ async function submitUserMessage(content: string) {
       text: ({ content, done, delta }) => {
         if (!textStream) {
           textStream = createStreamableValue('')
-          console.log("LOGGING FROM GOOGLE SEARCH!")
           textNode = <BotCard> <WebReferences props={searchData} /> <InternetMessage content={textStream.value}/> </BotCard>
         }
   
@@ -176,120 +195,78 @@ async function submitUserMessage(content: string) {
     }
   }
   // RAG FROM VECTOR STORE (DATABASE SEARCH)
-  else if (searchType && searchType === "DatabaseSearch") {
+  else if (searchType === "DatabaseSearch") {
     // get embedding
-  // 'embedding' is a single embedding object (number[])
-  const { embedding } = await embed({
-    model: openai.embedding('text-embedding-3-small'),
-    value: content,
-  });
+    // 'embedding' is a single embedding object (number[])
+    const { embedding } = await embed({
+      model: openai.embedding('text-embedding-3-small'),
+      value: content,
+    });
 
-  // // query vector store
-  let searchResult = await client.search("funding_store", {
-    vector: embedding,
-    limit: 3,
-    params: {
-      quantization: {
-        ignore: false,
-        rescore: true,
-        oversampling: 2.0,
+    // // query vector store
+    let searchResult = await client.search("funding_store", {
+      vector: embedding,
+      limit: 3,
+      params: {
+        quantization: {
+          ignore: false,
+          rescore: true,
+          oversampling: 2.0,
+        },
       },
-    },
-  });
+    });
 
-  // // strip result
-  const context = searchResult.map(search => ({
-    name: safeGet(search.payload, 'name'),
-    description: safeGet(search.payload, 'text'),
-    deadline: safeGet(search.payload, 'deadline'),
-    source: safeGet(search.payload, 'official_scholarship_website')
-  }));
+    // // strip result
+    const context = searchResult.map(search => ({
+      name: safeGet(search.payload, 'name'),
+      description: safeGet(search.payload, 'text'),
+      deadline: safeGet(search.payload, 'deadline'),
+      source: safeGet(search.payload, 'official_scholarship_website')
+    }));
 
-  // // Format the context into a string representation
-  const formattedContext = context.map((scholarship, index) => {
-    return `\n
-    {"name": "${scholarship.name}",\n
-      "description": "${scholarship.description}",\n
-      "deadline": "${scholarship.deadline}",\n
-      "source": "${scholarship.source}"
-    }\n`}).join('\n');
+    // // Format the context into a string representation
+    const formattedContext = context.map((scholarship, index) => {
+      return `\n
+      {"name": "${scholarship.name}",\n
+        "description": "${scholarship.description}",\n
+        "deadline": "${scholarship.deadline}",\n
+        "source": "${scholarship.source}"
+      }\n`}).join('\n');
+    
+    //console.log("DATABASE CONTEXT:", formattedContext)
+    let textStream: undefined | ReturnType<typeof createStreamableValue<string>>
+    let textNode: undefined | React.ReactNode
   
-  //console.log("DATABASE CONTEXT:", formattedContext)
-  let textStream: undefined | ReturnType<typeof createStreamableValue<string>>
-  let textNode: undefined | React.ReactNode
-  
-  const result = await streamUI({
-      model: openai('gpt-4o-mini'),
-      initial: <SpinnerMessage />,
-      system: `\
-      You are a helpful and friendly scholarship assistant. Your goal is to provide accurate and relevant information about scholarships to students using the Instructions and Context below.\n
-      
-      Context: ${formattedContext}\n
+    const result = await streamUI({
+        model: openai('gpt-4o-mini'),
+        initial: <SpinnerMessage />,
+        system: `\
+        You are a helpful and friendly scholarship assistant. Your goal is to provide accurate and relevant information about scholarships to students using the Instructions and Context below.\n
+        
+        Context: ${formattedContext}\n
 
-      INSTRUCTIONS:
-        - Use the Context provided above to answer the user's question.\n
-        - When there is Context provided, do NOT say "Sorry! you don't have information beyond the context". Just CALL the \`getScholarships\` tool.
-        - if user is asking about scholarships, call \`getScholarships\` tool and pass the context as list of dictionaries to generate a a UI response.\n
-        - ONLY use your training knowledge to provide tips and guidance about admissions and writing personal statements.\n
-        - If there is no Context above, politely respond you have no further knowledge. Do not hallucinate or use your training knowledge!`,
-      messages: [
-        ...aiState.get().messages.map((message: any) => ({
-          role: message.role,
-          content: message.content,
-          name: message.name
-        }))
-      ],
-      text: ({ content, done, delta }) => {
-        if (!textStream) {
-          textStream = createStreamableValue('')
-          textNode = <BotMessage content={textStream.value} />
-        }
-  
-        if (done) {
-          textStream.done()
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-              {
-                id: uuidv4(),
-                role: 'assistant',
-                content,
-                metadata: null,
-                searchType: searchType,
-              }
-            ]
-          })
-        } else {
-          textStream.update(delta)
-        }
-  
-        return textNode
-      },
-      tools: {
-        getScholarships: {
-          description: 'List three scholarships returned from the context.',
-          parameters: z.object({
-            scholarships: z.array(
-              z.object({
-                name: z.string().describe('The name of the scholarship'),
-                description: z.string().describe('The description of the scholarship'),
-                deadline: z.string().describe('The deadline of the scholarship, in format as it is'),
-                source: z.string().describe('The official website of the scholarship')
-              })
-            )
-          }),
-          generate: async function* ({ scholarships }) {
-            yield (
-              <BotCard>
-                <EventsSkeleton />
-              </BotCard>
-            )
-  
-            await sleep(1000)
-  
-            const toolCallId = uuidv4()
-  
+        INSTRUCTIONS:
+          - Always recommend three (3) scholarships!
+          - Use the Context provided above to answer the user's question.\n
+          - Do NOT respond "Sorry! I don't have information beyond the context provided". Just CALL the \`listScholarships\` tool.
+          - if user is asking about scholarships, call \`listScholarships\` tool and pass the context as list of dictionaries to generate a a UI response.\n
+          - ONLY use your training knowledge to provide tips and guidance about admissions and writing personal statements.\n
+          - If there is no Context above, politely respond you have no further knowledge. Do not hallucinate!`,
+        messages: [
+          ...aiState.get().messages.map((message: any) => ({
+            role: message.role,
+            content: message.content,
+            name: message.name
+          }))
+        ],
+        text: ({ content, done, delta }) => {
+          if (!textStream) {
+            textStream = createStreamableValue('')
+            textNode = <BotMessage content={textStream.value} />
+          }
+    
+          if (done) {
+            textStream.done()
             aiState.done({
               ...aiState.get(),
               messages: [
@@ -297,44 +274,86 @@ async function submitUserMessage(content: string) {
                 {
                   id: uuidv4(),
                   role: 'assistant',
-                  content: [
-                    {
-                      type: 'tool-call',
-                      toolName: 'getScholarships',
-                      toolCallId,
-                      args: { scholarships }
-                    }
-                  ],
-                  metadata: null,
-                  searchType: searchType,
-                },
-                {
-                  id: uuidv4(),
-                  role: 'tool',
-                  content: [
-                    {
-                      type: 'tool-result',
-                      toolName: 'getScholarships',
-                      toolCallId,
-                      result: scholarships
-                    }
-                  ],
+                  content,
                   metadata: null,
                   searchType: searchType,
                 }
               ]
             })
-  
-            return (
-              <BotCard>
-                <Events props={scholarships} />
-              </BotCard>
-            )
+          } else {
+            textStream.update(delta)
           }
+    
+          return textNode
         },
-      }
-    })
-      
+        tools: {
+          listScholarships: {
+            description: 'List three scholarships returned from the context.',
+            parameters: z.object({
+              scholarships: z.array(
+                z.object({
+                  name: z.string().describe('The name of the scholarship'),
+                  description: z.string().describe('The description of the scholarship'),
+                  deadline: z.string().describe('The deadline of the scholarship, in format as it is'),
+                  source: z.string().describe('The official website of the scholarship')
+                })
+              )
+            }),
+            generate: async function* ({ scholarships }) {
+              yield (
+                <BotCard>
+                  <ScholarshipsSkeleton />
+                </BotCard>
+              )
+    
+              await sleep(1000)
+    
+              const toolCallId = uuidv4()
+    
+              aiState.done({
+                ...aiState.get(),
+                messages: [
+                  ...aiState.get().messages,
+                  {
+                    id: uuidv4(),
+                    role: 'assistant',
+                    content: [
+                      {
+                        type: 'tool-call',
+                        toolName: 'listScholarships',
+                        toolCallId,
+                        args: { scholarships }
+                      }
+                    ],
+                    metadata: null,
+                    searchType: searchType,
+                  },
+                  {
+                    id: uuidv4(),
+                    role: 'tool',
+                    content: [
+                      {
+                        type: 'tool-result',
+                        toolName: 'listScholarships',
+                        toolCallId,
+                        result: scholarships
+                      }
+                    ],
+                    metadata: null,
+                    searchType: searchType,
+                  }
+                ]
+              })
+    
+              return (
+                <BotCard>
+                  <Scholarships props={scholarships} />
+                </BotCard>
+              )
+            }
+          },
+        }
+      })
     return {
       id: uuidv4(),
       display: result.value
@@ -354,8 +373,7 @@ export type UIState = {
 
 export const AI = createAI<AIState, UIState>({
   actions: {
-    submitUserMessage,
-    //confirmPurchase,
+    submitUserMessage
   },
   initialUIState: [],
   initialAIState: { chatId: uuidv4(), messages: [] },
@@ -381,6 +399,7 @@ export const AI = createAI<AIState, UIState>({
     const session = await auth()
 
     if (session && session.user) {
+      //console.log("STATE:", state)
       const { chatId, messages } = state
 
       const createdAt = new Date()
@@ -410,19 +429,22 @@ export const getUIStateFromAIState = (aiState: Chat) => {
   //console.log("AI STATE:", aiState.messages)
   //aiState.messages.map((message, index) => console.log("MESSAGES:", typeof aiState.messages))
   return aiState.messages
-    .filter(message => message.role !== 'system')
+    .filter((message) => message.role !== 'system' &&
+      !(message.role === 'assistant' &&
+        Array.isArray(message.content) &&
+        message.content.length === 1 &&
+        message.content[0].type === 'tool-call'))
     .map((message, index) => ({
       id: `${aiState.chatId}-${index}`,
       display:
         message.role === 'tool' ? (
           message.content.map(tool => {
             //console.log("TOOL:", tool.result)
-            console.log("TYPE:", typeof aiState.messages)
-           return tool.toolName === 'getScholarships' ? (
+           return tool.toolName === 'listScholarships' ? (
               <BotCard>
                 {/* TODO: Infer types based on the tool result*/}
-                {/* @ts-ignore */}
-                <Events props={tool.result} />
+                {/* @ts-expect-error */}
+                <Scholarships props={tool.result} />
               </BotCard>
            ) : null 
          })

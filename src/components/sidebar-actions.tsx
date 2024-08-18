@@ -102,6 +102,8 @@ export function SidebarActions({
                     path: chat.path
                   })
 
+                  console.log("DELETE PATH:", chat.path);
+
                   if (result && 'error' in result) {
                     toast.error(result.error)
                     return

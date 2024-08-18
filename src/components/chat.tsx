@@ -13,6 +13,7 @@ import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import React from 'react'
 import { SearchTypeDropdown } from '@/components/search-type';
+import { AI } from '@/lib/chat/actions'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
@@ -26,7 +27,7 @@ export function ChatComponent({ id, className, session, missingKeys }: ChatProps
   const path = usePathname()
   const [input, setInput] = useState('')
   const [messages] = useUIState()
-  const [aiState] = useAIState()
+  const [aiState] = useAIState<typeof AI>()
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -41,6 +42,9 @@ export function ChatComponent({ id, className, session, missingKeys }: ChatProps
   useEffect(() => {
     const messagesLength = aiState.messages?.length
     if (messagesLength === 2) {
+      router.refresh()
+    }
+    else if (messagesLength === 3 && aiState.messages[2].role === 'tool') {
       router.refresh()
     }
   }, [aiState.messages, router])

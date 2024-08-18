@@ -45,7 +45,6 @@ export function ChatShareDialog({
     },
     [copyToClipboard, onCopy]
   )
-  console.log("CHAT ID:", chat.id)
 
   return (
     <Dialog {...props}>

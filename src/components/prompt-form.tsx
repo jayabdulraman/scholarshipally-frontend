@@ -14,11 +14,9 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
-import { nanoid } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import Cookies from 'js-cookie';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from 'lucide-react';
 import { getCookie, setCookie } from 'typescript-cookie'
@@ -142,8 +140,10 @@ export function PromptForm({
                   variant="outline"
                   size="icon"
                   className="absolute left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault()
                     router.push('/')
+                    router.refresh()
                   }}
                 >
                   <IconPlus />

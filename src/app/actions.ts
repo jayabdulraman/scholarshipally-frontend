@@ -9,13 +9,20 @@ import axios from 'axios'
 import { cookies } from "next/headers";
 
 export async function getChats(userId?: string | null) {
+  const session = await auth()
   if (!userId) {
     return []
   }
 
+  if (userId !== session?.user?.id) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+
   try {
     const server = process.env.BASE_URL;
-    const session = await auth()
     const token = session?.accessToken;
 
     const headers = {
@@ -39,9 +46,15 @@ export async function getChats(userId?: string | null) {
 }
 
 export async function getChat(id: string, userId: string) {
+  const session = await auth()
+  if (userId !== session?.user?.id) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+  
   try {
     const server = process.env.BASE_URL;
-    const session = await auth()
     const token = session?.accessToken;
 
     const headers = {
@@ -53,10 +66,6 @@ export async function getChat(id: string, userId: string) {
 
     const chat = res.json()
 
-    //console.log("GET CHAT:",chat)
-    // const chat = await kv.hgetall<Chat>(`chat:${id}`)
-    // console.log("Get Threads:", chat)
-    //const UserId = parseInt(userId)
     if (!chat) {
       console.log('NOT RETURNING CHAT!')
       return null
@@ -90,9 +99,6 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
     }
   }
 
-  //Convert uid to string for consistent comparison with session.user.id
-  // const uid = String(await kv.hget(`chat:${id}`, 'userId'))
-
   const res = await axios.delete(`${server}/api/delete-thread/${id}/`, { headers, maxContentLength: Infinity,
     maxBodyLength: Infinity });
 
@@ -111,9 +117,6 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
       error: res.statusText
     }
   }
-
-  // await kv.del(`chat:${id}`)
-  // await kv.zrem(`user:chat:${session.user.id}`, `chat:${id}`)
 
   revalidatePath('/')
   return revalidatePath(path)
