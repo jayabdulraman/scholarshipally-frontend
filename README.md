@@ -10,7 +10,7 @@ Ally 🤖 is an assistant that helps prospective students find the right funding
 - Chat history to save conversations
 - Conversational style with memory
   
-Built with:
+## Built with:
 - Nextjs 
 - Typescript
 - shadcn UI components
@@ -21,17 +21,17 @@ Built with:
 See [backend](https://github.com/jayabdulraman/scholarshipally-backend), which enables data persistence through API.
 
 ## Getting Started
-
-First, run the development server:
+- Clone the dev repo
+- Create .env and add OPENAI_API_KEY, QDRANT_API_KEY, SEARCH_API_KEY, BASE_URL (http://127.0.0.1:8000), AUTH_SECRET (random secret key), and DEVELOPMENT_MODE='true' keys
+- Run npm install
+- Run npm run build (optional)
+  
+Now, run the development server:
 
 ```bash
 npm run dev
 # or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
